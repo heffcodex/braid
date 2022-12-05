@@ -149,6 +149,10 @@ func EResponseBadRequest(c *fiber.Ctx, eCode ErrorCode, data ...any) error {
 	return NewResponse(c).SetError(fiber.StatusBadRequest, eCode, data...).Error()
 }
 
+func EResponseUnauthorized(c *fiber.Ctx, data ...any) error {
+	return NewResponse(c).SetError(fiber.StatusUnauthorized, ErrorCodeNone, data...).Error()
+}
+
 func EResponseForbidden(c *fiber.Ctx, data ...any) error {
 	return NewResponse(c).SetError(fiber.StatusForbidden, ErrorCodeNone, data...).Error()
 }
