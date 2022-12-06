@@ -11,14 +11,14 @@ var _ fiber.Storage = (*StorageRedis)(nil)
 
 type StorageRedis struct {
 	rc          redis.UniversalClient
-	ctxProvider ContextProvider
 	keysPrefix  string
+	ctxProvider ContextProvider
 	flushDBMode bool
 	allowClose  bool
 }
 
-func NewStorageRedis(rc redis.UniversalClient, ctxProvider ContextProvider, keysPrefix string) *StorageRedis {
-	return &StorageRedis{rc: rc, ctxProvider: ctxProvider, keysPrefix: keysPrefix}
+func NewStorageRedis(rc redis.UniversalClient, keysPrefix string, ctxProvider ContextProvider) *StorageRedis {
+	return &StorageRedis{rc: rc, keysPrefix: keysPrefix, ctxProvider: ctxProvider}
 }
 
 func (s *StorageRedis) EnableFlushDB(v bool) { s.flushDBMode = v }
