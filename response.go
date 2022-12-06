@@ -1,6 +1,7 @@
 package braid
 
 import (
+	gojson "github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -57,8 +58,16 @@ func (r *Response) Raw() error {
 }
 
 func (r *Response) JSON() error {
+	raw, err := gojson.MarshalContext(r.c.UserContext(), r)
+	if err != nil {
+		return err
+	}
+
 	r.c.Status(r.code)
-	return r.c.JSON(r)
+	r.c.Response().SetBodyRaw(raw)
+	r.c.Response().Header.SetContentType(fiber.MIMEApplicationJSON)
+
+	return nil
 }
 
 func (r *Response) Error() error {
