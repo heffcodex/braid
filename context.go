@@ -5,27 +5,15 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-const (
-	UserContextFiberCtxKey = "__fiberCtx"
-)
-
-func CtxToUserContext(c *fiber.Ctx) {
-	c.SetUserContext(context.WithValue(c.UserContext(), UserContextFiberCtxKey, c))
+func SetContextValue[T any](c *fiber.Ctx, key string, value T) {
+	c.SetUserContext(context.WithValue(c.UserContext(), key, value))
 }
 
-func CtxFromUserContext(ctx context.Context) *fiber.Ctx {
-	if ctx == nil {
-		return nil
+func GetContextValue[T any](c *fiber.Ctx, key string) (value T, ok bool) {
+	v, ok := c.UserContext().Value(key).(T)
+	if !ok || v == nil {
+		return *new(T), false
 	}
 
-	if c, ok := ctx.Value(UserContextFiberCtxKey).(*fiber.Ctx); ok {
-		return c
-	}
-
-	return nil
-}
-
-func CtxInjectionMiddleware(c *fiber.Ctx) error {
-	CtxToUserContext(c)
-	return c.Next()
+	return v, true
 }
