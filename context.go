@@ -11,7 +11,7 @@ func SetContextValue[T any](c *fiber.Ctx, key string, value T) {
 
 func GetContextValue[T any](c *fiber.Ctx, key string) (value T, ok bool) {
 	v, ok := c.UserContext().Value(key).(T)
-	if !ok || v == nil {
+	if !ok {
 		return *new(T), false
 	}
 
