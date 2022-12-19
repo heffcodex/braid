@@ -25,10 +25,6 @@ type Validator struct {
 	v  *validator.Validate
 }
 
-func V(c *fiber.Ctx) *Validator {
-	return getValidator(c)
-}
-
 func getValidator(c *fiber.Ctx) *Validator {
 	return c.Locals(LocalValidator).(*Validator)
 }
