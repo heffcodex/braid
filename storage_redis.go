@@ -18,6 +18,10 @@ type StorageRedis struct {
 }
 
 func NewStorageRedis(rc redis.UniversalClient, ctxProvider ContextProvider) *StorageRedis {
+	if ctxProvider == nil {
+		ctxProvider = ctxProviderDefault
+	}
+
 	return &StorageRedis{rc: rc, ctxProvider: ctxProvider}
 }
 
