@@ -2,6 +2,8 @@ package braid
 
 import (
 	"context"
+	"github.com/heffcodex/braid/response"
+	"github.com/heffcodex/braid/status"
 	"reflect"
 	"strings"
 
@@ -62,14 +64,14 @@ func (v *Validator) RegisterModifier(tag string, fn mold.Func) {
 
 func (v *Validator) BindAndValidate(c *fiber.Ctx, form any) error {
 	if err := c.BodyParser(form); err != nil {
-		return EResponseBadRequest(c, ErrorCodeInvalidPayload)
+		return response.EBadRequest(status.InvalidPayload)
 	}
 
 	vErr, err := v.validate(c.Context(), form)
 	if err != nil {
-		return EResponseInternalError(c, errors.Wrap(err, "cannot validate form"))
+		return response.EInternal(errors.Wrap(err, "cannot validate form"))
 	} else if len(vErr) > 0 {
-		return EResponseBadRequest(c, ErrorCodeValidationFail, vErr)
+		return response.EBadRequest(status.ValidationFail, vErr)
 	}
 
 	return nil

@@ -3,6 +3,8 @@ package braid
 import (
 	gojson "github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v2"
+	"github.com/heffcodex/braid/response"
+	"github.com/heffcodex/braid/status"
 	"github.com/pkg/errors"
 )
 
@@ -28,32 +30,32 @@ func ErrorHandlerDefault(onInternalError OnInternalError) fiber.ErrorHandler {
 		if errors.As(err, &fe) { // catch fiber error and wrap it into braid.Response, hiding some details from client
 			switch fe.Code {
 			case fiber.StatusBadRequest:
-				err = EResponseBadRequest(c, NewErrorCode(ECICustom, fe.Message))
+				err = response.EBadRequest(status.New(status.CodeGenBadRequest, fe.Message))
 			case fiber.StatusUnauthorized:
-				err = EResponseUnauthorized(c)
+				err = response.EUnauthorized(c)
 			case fiber.StatusForbidden:
-				err = EResponseForbidden(c)
+				err = response.EForbidden(c)
 			case fiber.StatusNotFound:
-				err = EResponseNotFound(c)
+				err = response.ENotFound(c)
 			default:
 				if fe.Code >= 500 && fe.Code <= 599 {
-					err = EResponseInternalError(c, err)
+					err = response.EInternal(err)
 				} else {
-					err = NewResponse(c).SetError(fe.Code, NewErrorCode(ECICustom, fe.Message)).Error
+					err = response.NewJSONError(status.New(status.Code(fe.Code), fe.Message), nil)
 				}
 			}
 		}
 
-		var re *ResponseError
+		var je *response.JSONError
 
-		if !errors.As(err, &re) {
-			re = EResponseInternalError(c, err).(*ResponseError)
+		if !errors.As(err, &je) {
+			je = response.NewJSONError(status.GenInternalError, err)
 		}
 
-		if re.IsInternal() && onInternalError != nil {
-			onInternalError(c, re.InternalError())
+		if je.IsInternal() && onInternalError != nil {
+			onInternalError(c, je.InternalError())
 		}
 
-		return re.Response().SendJSON()
+		return je.Send(c)
 	}
 }
