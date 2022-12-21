@@ -44,7 +44,7 @@ func ErrorHandlerDefault(onInternalError OnInternalError) fiber.ErrorHandler {
 			}
 		}
 
-		var re *ResponseError
+		re := new(ResponseError)
 
 		if !errors.As(err, re) {
 			re = EResponseInternalError(c, err).(*ResponseError)
