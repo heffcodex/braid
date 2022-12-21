@@ -14,8 +14,8 @@ type ResponseError struct {
 	Message string    `json:"message"`
 	Data    any       `json:"data,omitempty"`
 
-	response    *Response
-	internalErr error
+	response *Response
+	internal error
 }
 
 func (re *ResponseError) Error() string {
@@ -27,7 +27,7 @@ func (re *ResponseError) IsInternal() bool {
 }
 
 func (re *ResponseError) InternalError() error {
-	return re.internalErr
+	return re.internal
 }
 
 func (re *ResponseError) Response() *Response {
@@ -35,57 +35,46 @@ func (re *ResponseError) Response() *Response {
 }
 
 type Response struct {
-	Meta any `json:"meta,omitempty"`
-	Data any `json:"data,omitempty"`
+	Meta  any            `json:"meta,omitempty"`
+	Data  any            `json:"data,omitempty"`
+	Error *ResponseError `json:"err,omitempty"`
 
-	c    *fiber.Ctx
-	code int
-	err  *ResponseError
+	c          *fiber.Ctx
+	statusCode int
 }
 
 func NewResponse(c *fiber.Ctx) *Response {
-	return &Response{c: c, code: c.Response().StatusCode()}
+	return &Response{c: c, statusCode: c.Response().StatusCode()}
 }
 
-func (r *Response) Empty() error {
-	r.c.Status(r.code)
+func (r *Response) SendEmpty() error {
+	r.c.Status(r.statusCode)
 	return nil
 }
 
-func (r *Response) Raw() error {
-	r.c.Status(r.code)
+func (r *Response) SendRawData() error {
+	r.c.Status(r.statusCode)
 	return r.c.Send(r.Data.([]byte))
 }
 
-func (r *Response) JSON() error {
+func (r *Response) SendJSON() error {
 	raw, err := gojson.MarshalContext(r.c.UserContext(), r)
 	if err != nil {
 		return err
 	}
 
-	r.c.Status(r.code)
+	r.c.Status(r.statusCode)
 	r.c.Response().SetBodyRaw(raw)
 	r.c.Response().Header.SetContentType(fiber.MIMEApplicationJSON)
 
 	return nil
 }
 
-func (r *Response) Error() error {
-	if r.err != nil {
-		return r.err
-	}
-
-	return nil
+func (r *Response) SetInternalError(err error) *Response {
+	return r.setError(fiber.StatusInternalServerError, ErrorCodeInternal, err, nil)
 }
 
-func (r *Response) SetInternalError(internalErr error) *Response {
-	r.SetError(fiber.StatusInternalServerError, ErrorCodeInternal)
-	r.err.internalErr = internalErr
-
-	return r
-}
-
-func (r *Response) SetError(httpCode int, eCode ErrorCode, data ...any) *Response {
+func (r *Response) SetError(statusCode int, eCode ErrorCode, data ...any) *Response {
 	if len(data) > 1 {
 		panic("too many arguments")
 	}
@@ -95,16 +84,20 @@ func (r *Response) SetError(httpCode int, eCode ErrorCode, data ...any) *Respons
 		_data = data[0]
 	}
 
-	r.code = httpCode
-	r.err = &ResponseError{
-		Code:     eCode,
-		Message:  eCode.GetMessage(),
-		Data:     _data,
-		response: r,
-	}
+	return r.setError(statusCode, eCode, nil, _data)
+}
 
+func (r *Response) setError(statusCode int, eCode ErrorCode, internal error, data any) *Response {
+	r.statusCode = statusCode
 	r.Meta = nil
 	r.Data = nil
+	r.Error = &ResponseError{
+		Code:     eCode,
+		Message:  eCode.GetMessage(),
+		Data:     data,
+		response: r,
+		internal: internal,
+	}
 
 	return r
 }
@@ -119,11 +112,10 @@ func (r *Response) SetData(httpCode int, data any, meta ...any) *Response {
 		_meta = meta[0]
 	}
 
-	r.code = httpCode
-	r.err = nil
-
+	r.statusCode = httpCode
 	r.Meta = _meta
 	r.Data = data
+	r.Error = nil
 
 	return r
 }
@@ -131,22 +123,22 @@ func (r *Response) SetData(httpCode int, data any, meta ...any) *Response {
 // 2xx
 
 func ResponseOK(c *fiber.Ctx, data any, meta ...any) error {
-	return NewResponse(c).SetData(fiber.StatusOK, data, meta...).JSON()
+	return NewResponse(c).SetData(fiber.StatusOK, data, meta...).SendJSON()
 }
 
 func ResponseFileTransfer(c *fiber.Ctx, filename string, data []byte) error {
 	c.Set(HeaderContentDescription, "File Transfer")
 	c.Attachment(filename)
 
-	return NewResponse(c).SetData(fiber.StatusOK, data).Raw()
+	return NewResponse(c).SetData(fiber.StatusOK, data).SendRawData()
 }
 
 func ResponseCreated(c *fiber.Ctx, data any, meta ...any) error {
-	return NewResponse(c).SetData(fiber.StatusCreated, data, meta...).JSON()
+	return NewResponse(c).SetData(fiber.StatusCreated, data, meta...).SendJSON()
 }
 
 func ResponseNoContent(c *fiber.Ctx) error {
-	return NewResponse(c).SetData(fiber.StatusNoContent, nil).Empty()
+	return NewResponse(c).SetData(fiber.StatusNoContent, nil).SendEmpty()
 }
 
 // All functions below with E prefix return not the error of sending the response to the client,
@@ -155,23 +147,23 @@ func ResponseNoContent(c *fiber.Ctx) error {
 // 4xx
 
 func EResponseBadRequest(c *fiber.Ctx, eCode ErrorCode, data ...any) error {
-	return NewResponse(c).SetError(fiber.StatusBadRequest, eCode, data...).Error()
+	return NewResponse(c).SetError(fiber.StatusBadRequest, eCode, data...).Error
 }
 
 func EResponseUnauthorized(c *fiber.Ctx, data ...any) error {
-	return NewResponse(c).SetError(fiber.StatusUnauthorized, ErrorCodeNone, data...).Error()
+	return NewResponse(c).SetError(fiber.StatusUnauthorized, ErrorCodeNone, data...).Error
 }
 
 func EResponseForbidden(c *fiber.Ctx, data ...any) error {
-	return NewResponse(c).SetError(fiber.StatusForbidden, ErrorCodeNone, data...).Error()
+	return NewResponse(c).SetError(fiber.StatusForbidden, ErrorCodeNone, data...).Error
 }
 
 func EResponseNotFound(c *fiber.Ctx, data ...any) error {
-	return NewResponse(c).SetError(fiber.StatusNotFound, ErrorCodeNone, data...).Error()
+	return NewResponse(c).SetError(fiber.StatusNotFound, ErrorCodeNone, data...).Error
 }
 
 // 5xx
 
 func EResponseInternalError(c *fiber.Ctx, internalErr error) error {
-	return NewResponse(c).SetInternalError(internalErr).Error()
+	return NewResponse(c).SetInternalError(internalErr).Error
 }

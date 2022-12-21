@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type OnErrorHandler func(c *fiber.Ctx, err error)
+type OnInternalError func(c *fiber.Ctx, err error)
 
 func ConfigDefault() fiber.Config {
 	return fiber.Config{
@@ -21,38 +21,39 @@ func ConfigDefault() fiber.Config {
 	}
 }
 
-func ErrorHandlerDefault(onErrorHandler OnErrorHandler) fiber.ErrorHandler {
-	if onErrorHandler == nil {
-		onErrorHandler = func(*fiber.Ctx, error) {}
-	}
-
+func ErrorHandlerDefault(onInternalError OnInternalError) fiber.ErrorHandler {
 	return func(c *fiber.Ctx, err error) error {
 		var fe *fiber.Error
 
-		if errors.As(err, &fe) { // catch fiber error and wrap it into braid.Response, hiding 5xx error details from client
-			message := fe.Message
-
-			if fe.Code >= 500 && fe.Code <= 599 {
-				message = ErrorCodeInternal.GetMessage()
-				onErrorHandler(c, errors.Wrapf(err, "fiber.Error [%d]", fe.Code))
+		if errors.As(err, &fe) { // catch fiber error and wrap it into braid.Response, hiding some details from client
+			switch fe.Code {
+			case fiber.StatusBadRequest:
+				err = EResponseBadRequest(c, NewErrorCode(ECICustom, fe.Message))
+			case fiber.StatusUnauthorized:
+				err = EResponseUnauthorized(c)
+			case fiber.StatusForbidden:
+				err = EResponseForbidden(c)
+			case fiber.StatusNotFound:
+				err = EResponseNotFound(c)
+			default:
+				if fe.Code >= 500 && fe.Code <= 599 {
+					err = EResponseInternalError(c, err)
+				} else {
+					err = NewResponse(c).SetError(fe.Code, NewErrorCode(ECICustom, fe.Message)).Error
+				}
 			}
-
-			return NewResponse(c).SetError(fe.Code, NewErrorCode(ECICustom, message)).JSON()
 		}
 
 		var re *ResponseError
 
-		if errors.As(err, &re) {
-			if re.IsInternal() {
-				onErrorHandler(c, errors.Wrap(re.InternalError(), "braid.ResponseError"))
-			}
-
-			return re.Response().JSON()
+		if !errors.As(err, re) {
+			re = EResponseInternalError(c, err).(*ResponseError)
 		}
 
-		onErrorHandler(c, errors.Wrap(err, "unknown error"))
-		c.Status(fiber.StatusInternalServerError).Response().ResetBody()
+		if re.IsInternal() && onInternalError != nil {
+			onInternalError(c, re.InternalError())
+		}
 
-		return nil
+		return re.Response().SendJSON()
 	}
 }
