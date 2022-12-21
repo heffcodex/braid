@@ -37,7 +37,7 @@ func (re *ResponseError) Response() *Response {
 type Response struct {
 	Meta  any            `json:"meta,omitempty"`
 	Data  any            `json:"data,omitempty"`
-	Error *ResponseError `json:"err,omitempty"`
+	Error *ResponseError `json:"error,omitempty"`
 
 	c          *fiber.Ctx
 	statusCode int
