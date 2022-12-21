@@ -32,11 +32,11 @@ func ErrorHandlerDefault(onInternalError OnInternalError) fiber.ErrorHandler {
 			case fiber.StatusBadRequest:
 				err = response.EBadRequest(status.New(status.CodeGenBadRequest, fe.Message))
 			case fiber.StatusUnauthorized:
-				err = response.EUnauthorized(c)
+				err = response.EUnauthorized()
 			case fiber.StatusForbidden:
-				err = response.EForbidden(c)
+				err = response.EForbidden()
 			case fiber.StatusNotFound:
-				err = response.ENotFound(c)
+				err = response.ENotFound()
 			default:
 				if fe.Code >= 500 && fe.Code <= 599 {
 					err = response.EInternal(err)
