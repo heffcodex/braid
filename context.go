@@ -5,15 +5,24 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func SetContextValue[T any](c *fiber.Ctx, key string, value T) {
+func Set[T any](c *fiber.Ctx, key string, value T) {
 	c.SetUserContext(context.WithValue(c.UserContext(), key, value))
 }
 
-func GetContextValue[T any](c *fiber.Ctx, key string) (value T, ok bool) {
+func Get[T any](c *fiber.Ctx, key string) (value T, ok bool) {
 	v, ok := c.UserContext().Value(key).(T)
 	if !ok {
 		return *new(T), false
 	}
 
 	return v, true
+}
+
+func MustGet[T any](c *fiber.Ctx, key string) T {
+	v, ok := Get[T](c, key)
+	if !ok {
+		panic("`" + key + "` not found in context")
+	}
+
+	return v
 }
