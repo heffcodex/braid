@@ -13,7 +13,7 @@ var (
 )
 
 type JSONErrorFormat struct {
-	Code    status.Code `json:"code"`
+	Code    status.Code `json:"code" swaggertype:"integer"`
 	Message string      `json:"message,omitempty"`
 	Data    any         `json:"data,omitempty"`
 }
