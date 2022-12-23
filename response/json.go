@@ -8,6 +8,12 @@ import (
 
 var _ IResponse = (*JSON)(nil)
 
+type JSONFormat struct {
+	Meta  any              `json:"meta,omitempty"`
+	Data  any              `json:"data,omitempty"`
+	Error *JSONErrorFormat `json:"error,omitempty"`
+}
+
 type JSON struct {
 	s          *status.Status
 	meta, data any
@@ -30,12 +36,7 @@ func NewJSON(s *status.Status, data any, meta ...any) *JSON {
 }
 
 func (r *JSON) Send(c *fiber.Ctx) error {
-	type format struct {
-		Meta any `json:"meta,omitempty"`
-		Data any `json:"data,omitempty"`
-	}
-
-	raw, err := gojson.MarshalContext(c.UserContext(), format{
+	raw, err := gojson.MarshalContext(c.UserContext(), JSONFormat{
 		Meta: r.meta,
 		Data: r.data,
 	})

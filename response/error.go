@@ -12,6 +12,12 @@ var (
 	_ error     = (*JSONError)(nil)
 )
 
+type JSONErrorFormat struct {
+	Code    status.Code `json:"code"`
+	Message string      `json:"message,omitempty"`
+	Data    any         `json:"data,omitempty"`
+}
+
 type JSONError struct {
 	s           *status.Status
 	internalErr error
@@ -31,14 +37,8 @@ func NewJSONError(s *status.Status, internal error, data ...any) *JSONError {
 }
 
 func (r *JSONError) Send(c *fiber.Ctx) error {
-	type formatError struct {
-		Code    status.Code `json:"code"`
-		Message string      `json:"message,omitempty"`
-		Data    any         `json:"data,omitempty"`
-	}
-
-	raw, err := gojson.MarshalContext(c.UserContext(), map[string]formatError{
-		"error": {
+	raw, err := gojson.MarshalContext(c.UserContext(), JSONFormat{
+		Error: &JSONErrorFormat{
 			Code:    r.s.Code(),
 			Message: r.s.Message(),
 			Data:    r.data,
