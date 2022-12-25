@@ -36,7 +36,7 @@ func NewJSON(s *status.Status, data any, meta ...any) *JSON {
 }
 
 func (r *JSON) Send(c *fiber.Ctx) error {
-	raw, err := gojson.MarshalContext(c.UserContext(), JSONFormat{
+	raw, err := gojson.MarshalContext(c.Context(), JSONFormat{
 		Meta: r.meta,
 		Data: r.data,
 	})

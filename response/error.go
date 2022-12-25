@@ -37,7 +37,7 @@ func NewJSONError(s *status.Status, internal error, data ...any) *JSONError {
 }
 
 func (r *JSONError) Send(c *fiber.Ctx) error {
-	raw, err := gojson.MarshalContext(c.UserContext(), JSONFormat{
+	raw, err := gojson.MarshalContext(c.Context(), JSONFormat{
 		Error: &JSONErrorFormat{
 			Code:    r.s.Code(),
 			Message: r.s.Message(),
