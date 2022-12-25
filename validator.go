@@ -17,9 +17,8 @@ import (
 const LocalValidator = "validator"
 
 type validationErrorData struct {
-	Tag     string `json:"tag"`
-	Param   string `json:"param"`
-	Message string `json:"message"`
+	Tag   string `json:"tag"`
+	Param string `json:"param"`
 }
 
 type Validator struct {
@@ -103,9 +102,8 @@ func (v *Validator) transformValidationErrors(errors validator.ValidationErrors)
 
 	for _, err := range errors {
 		m[err.Field()] = validationErrorData{
-			Tag:     err.Tag(),
-			Param:   err.Param(),
-			Message: err.Error(),
+			Tag:   err.Tag(),
+			Param: err.Param(),
 		}
 	}
 
