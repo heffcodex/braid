@@ -3,21 +3,22 @@ package status
 import "github.com/gofiber/fiber/v2"
 
 const (
-	CodeGenOK        Code = 200
-	CodeGenCreated   Code = 201
-	CodeGenNoContent Code = 204
+	CodeGenOK        Code = fiber.StatusOK
+	CodeGenCreated   Code = fiber.StatusCreated
+	CodeGenNoContent Code = fiber.StatusNoContent
 
-	CodeGenBadRequest     Code = 400
-	CodeCSRFTokenMismatch Code = 400001
-	CodeValidationFail    Code = 400002
-	CodeInvalidQuery      Code = 400003
-	CodeInvalidPayload    Code = 400004
+	CodeGenBadRequest     Code = fiber.StatusBadRequest
+	CodeCSRFTokenMismatch Code = fiber.StatusBadRequest*1000 + 1
+	CodeValidationFail    Code = fiber.StatusBadRequest*1000 + 2
+	CodeInvalidQuery      Code = fiber.StatusBadRequest*1000 + 3
+	CodeInvalidPayload    Code = fiber.StatusBadRequest*1000 + 4
 
-	CodeGenUnauthorized Code = 401
-	CodeGenForbidden    Code = 403
-	CodeGenNotFound     Code = 404
+	CodeGenUnauthorized Code = fiber.StatusUnauthorized
+	CodeGenForbidden    Code = fiber.StatusForbidden
+	CodeGenNotFound     Code = fiber.StatusNotFound
+	CodeGenConflict     Code = fiber.StatusConflict
 
-	CodeGenInternalError Code = 500
+	CodeGenInternalError Code = fiber.StatusInternalServerError
 )
 
 var (
@@ -27,17 +28,18 @@ var (
 )
 
 var (
-	GenBadRequest     = New(CodeGenBadRequest, "Bad request").SetHTTP(fiber.StatusBadRequest)
-	CSRFTokenMismatch = New(CodeCSRFTokenMismatch, "CSRF token mismatch").AttachTo(GenBadRequest)
-	ValidationFail    = New(CodeValidationFail, "Validation failed").AttachTo(GenBadRequest)
-	InvalidQuery      = New(CodeInvalidQuery, "Invalid query").AttachTo(GenBadRequest)
-	InvalidPayload    = New(CodeInvalidPayload, "Invalid payload").AttachTo(GenBadRequest)
+	GenBadRequest     = New(CodeGenBadRequest, "Bad Request").SetHTTP(fiber.StatusBadRequest)
+	CSRFTokenMismatch = New(CodeCSRFTokenMismatch, "CSRF Token Mismatch").AttachTo(GenBadRequest)
+	ValidationFail    = New(CodeValidationFail, "Validation Failed").AttachTo(GenBadRequest)
+	InvalidQuery      = New(CodeInvalidQuery, "Invalid Query").AttachTo(GenBadRequest)
+	InvalidPayload    = New(CodeInvalidPayload, "Invalid Payload").AttachTo(GenBadRequest)
 )
 
 var (
 	GenUnauthorized = New(CodeGenUnauthorized, "Unauthorized").SetHTTP(fiber.StatusUnauthorized)
 	GenForbidden    = New(CodeGenForbidden, "Forbidden").SetHTTP(fiber.StatusForbidden)
-	GenNotFound     = New(CodeGenNotFound, "Not found").SetHTTP(fiber.StatusNotFound)
+	GenNotFound     = New(CodeGenNotFound, "Not Found").SetHTTP(fiber.StatusNotFound)
+	GenConflict     = New(CodeGenConflict, "Conflict").SetHTTP(fiber.StatusConflict)
 )
 
 var (
