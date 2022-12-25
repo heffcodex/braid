@@ -61,6 +61,10 @@ func ENotFound(data ...any) error {
 	return eJSON(status.GenNotFound, nil, nil, data...)
 }
 
+func EConflict(data ...any) error {
+	return eJSON(status.GenConflict, nil, nil, data...)
+}
+
 // 5xx
 
 func EInternal(err error) error {
