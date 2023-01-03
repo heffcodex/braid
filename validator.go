@@ -6,6 +6,7 @@ import (
 	"github.com/heffcodex/braid/status"
 	"reflect"
 	"strings"
+	"unicode"
 
 	"github.com/go-playground/mold/v4"
 	"github.com/go-playground/mold/v4/modifiers"
@@ -102,14 +103,27 @@ func (v *Validator) transformValidationErrors(errors validator.ValidationErrors)
 	m := make(map[string]validationErrorData)
 
 	for _, err := range errors {
-		ns := err.Namespace()
+		nsArrDirty := strings.Split(err.Namespace(), ".")
+		if len(nsArrDirty) > 1 { // skip struct name
+			nsArrDirty = nsArrDirty[1:]
+		}
+
+		nsArr := make([]string, 0, len(nsArrDirty))
+		for _, part := range nsArrDirty {
+			if len(part) == 0 { // skip empty parts
+				continue
+			}
+
+			if unicode.IsUpper([]rune(part)[0]) { // skip upper case parts as they are possible embedded structs
+				continue
+			}
+
+			nsArr = append(nsArr, part)
+		}
+
+		ns := strings.Join(nsArr, ".")
 		if ns == "" {
 			ns = err.Field()
-		} else {
-			nss := strings.Split(ns, ".")
-			if len(nss) > 1 {
-				ns = strings.Join(nss[1:], ".")
-			}
 		}
 
 		m[ns] = validationErrorData{

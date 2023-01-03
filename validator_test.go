@@ -19,10 +19,14 @@ func TestValidator_RegisterValidation(t *testing.T) {
 		return false
 	}))
 
-	type form struct {
+	type E struct {
 		Inner struct {
 			FieldFalse string `json:"field_false" validate:"testFalse"`
 		} `json:"inner"`
+	}
+
+	type form struct {
+		E
 		FieldTrue string `json:"field_true" validate:"testTrue"`
 	}
 
