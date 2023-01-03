@@ -22,13 +22,13 @@ const (
 )
 
 var (
-	GenOK        = New(CodeGenOK).SetHTTP(fiber.StatusOK)
-	GenCreated   = New(CodeGenCreated).SetHTTP(fiber.StatusCreated)
-	GenNoContent = New(CodeGenNoContent).SetHTTP(fiber.StatusNoContent)
+	GenOK        = New(CodeGenOK).WithHTTP(fiber.StatusOK)
+	GenCreated   = New(CodeGenCreated).WithHTTP(fiber.StatusCreated)
+	GenNoContent = New(CodeGenNoContent).WithHTTP(fiber.StatusNoContent)
 )
 
 var (
-	GenBadRequest     = New(CodeGenBadRequest, "Bad Request").SetHTTP(fiber.StatusBadRequest)
+	GenBadRequest     = New(CodeGenBadRequest, "Bad Request").WithHTTP(fiber.StatusBadRequest)
 	CSRFTokenMismatch = New(CodeCSRFTokenMismatch, "CSRF Token Mismatch").AttachTo(GenBadRequest)
 	ValidationFail    = New(CodeValidationFail, "Validation Failed").AttachTo(GenBadRequest)
 	InvalidQuery      = New(CodeInvalidQuery, "Invalid Query").AttachTo(GenBadRequest)
@@ -36,12 +36,12 @@ var (
 )
 
 var (
-	GenUnauthorized = New(CodeGenUnauthorized, "Unauthorized").SetHTTP(fiber.StatusUnauthorized)
-	GenForbidden    = New(CodeGenForbidden, "Forbidden").SetHTTP(fiber.StatusForbidden)
-	GenNotFound     = New(CodeGenNotFound, "Not Found").SetHTTP(fiber.StatusNotFound)
-	GenConflict     = New(CodeGenConflict, "Conflict").SetHTTP(fiber.StatusConflict)
+	GenUnauthorized = New(CodeGenUnauthorized, "Unauthorized").WithHTTP(fiber.StatusUnauthorized)
+	GenForbidden    = New(CodeGenForbidden, "Forbidden").WithHTTP(fiber.StatusForbidden)
+	GenNotFound     = New(CodeGenNotFound, "Not Found").WithHTTP(fiber.StatusNotFound)
+	GenConflict     = New(CodeGenConflict, "Conflict").WithHTTP(fiber.StatusConflict)
 )
 
 var (
-	GenInternalError = New(CodeGenInternalError, "Internal server error").SetHTTP(fiber.StatusInternalServerError)
+	GenInternalError = New(CodeGenInternalError, "Internal server error").WithHTTP(fiber.StatusInternalServerError)
 )

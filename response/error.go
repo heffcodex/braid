@@ -48,7 +48,7 @@ func (r *JSONError) Send(c *fiber.Ctx) error {
 		return err
 	}
 
-	c.Status(r.s.GetHTTP())
+	c.Status(r.s.HTTP())
 	c.Response().SetBodyRaw(raw)
 	c.Response().Header.SetContentType(fiber.MIMEApplicationJSON)
 

@@ -52,16 +52,11 @@ func (e *Status) Parent() *Status {
 	return e.parent
 }
 
-func (e *Status) AttachTo(parent *Status) *Status {
-	e.parent = parent
-	return e
-}
-
 func (e *Status) Code() Code {
 	return e.code
 }
 
-func (e *Status) GetHTTP() int {
+func (e *Status) HTTP() int {
 	if e.codeHTTP != 0 {
 		return e.codeHTTP
 	}
@@ -75,22 +70,8 @@ func (e *Status) GetHTTP() int {
 	panic("no status code found")
 }
 
-func (e *Status) SetHTTP(code int) *Status {
-	e.codeHTTP = code
-	return e
-}
-
 func (e *Status) Message() string {
 	return e.message
-}
-
-func (e *Status) Copy() *Status {
-	return &Status{
-		parent:   e.parent.Copy(),
-		code:     e.code,
-		codeHTTP: e.codeHTTP,
-		message:  e.message,
-	}
 }
 
 func (e Status) String() string {
@@ -104,4 +85,39 @@ func (e Status) String() string {
 
 func (e Status) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.Itoa(int(e.code))), nil
+}
+
+func (e *Status) AttachTo(parent *Status) *Status {
+	clone := e.clone()
+	clone.parent = parent
+
+	return clone
+}
+
+func (e *Status) AppendMessage(message string) *Status {
+	clone := e.clone()
+	clone.message = clone.message + ": " + message
+
+	return clone
+}
+
+func (e *Status) WithHTTP(code int) *Status {
+	clone := e.clone()
+	clone.codeHTTP = code
+
+	return clone
+}
+
+func (e *Status) clone() *Status {
+	parent := e.parent
+	if parent != nil {
+		parent = parent.clone()
+	}
+
+	return &Status{
+		parent:   parent,
+		code:     e.code,
+		codeHTTP: e.codeHTTP,
+		message:  e.message,
+	}
 }

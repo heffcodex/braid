@@ -31,7 +31,7 @@ func ErrorHandlerDefault(onInternalError OnInternalError) fiber.ErrorHandler {
 			if fe.Code >= 500 && fe.Code <= 599 {
 				err = response.EInternal(err)
 			} else {
-				err = response.NewJSONError(status.New(status.Code(fe.Code), fe.Message).SetHTTP(fe.Code), nil)
+				err = response.NewJSONError(status.New(status.Code(fe.Code), fe.Message).WithHTTP(fe.Code), nil)
 			}
 		}
 

@@ -16,6 +16,6 @@ func NewEmpty(s *status.Status) *Empty {
 }
 
 func (r *Empty) Send(c *fiber.Ctx) error {
-	c.Status(r.s.GetHTTP())
+	c.Status(r.s.HTTP())
 	return nil
 }
