@@ -6,7 +6,7 @@ import (
 	"github.com/heffcodex/braid/status"
 )
 
-var _ IResponse = (*JSON)(nil)
+var _ Sender = (*JSON)(nil)
 
 type JSONFormat struct {
 	Meta  any              `json:"meta,omitempty"`

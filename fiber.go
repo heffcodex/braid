@@ -28,21 +28,10 @@ func ErrorHandlerDefault(onInternalError OnInternalError) fiber.ErrorHandler {
 		var fe *fiber.Error
 
 		if errors.As(err, &fe) { // catch fiber error and wrap it into braid.Response, hiding some details from client
-			switch fe.Code {
-			case fiber.StatusBadRequest:
-				err = response.EBadRequest(status.New(status.CodeGenBadRequest, fe.Message))
-			case fiber.StatusUnauthorized:
-				err = response.EUnauthorized()
-			case fiber.StatusForbidden:
-				err = response.EForbidden()
-			case fiber.StatusNotFound:
-				err = response.ENotFound()
-			default:
-				if fe.Code >= 500 && fe.Code <= 599 {
-					err = response.EInternal(err)
-				} else {
-					err = response.NewJSONError(status.New(status.Code(fe.Code), fe.Message).SetHTTP(fe.Code), nil)
-				}
+			if fe.Code >= 500 && fe.Code <= 599 {
+				err = response.EInternal(err)
+			} else {
+				err = response.NewJSONError(status.New(status.Code(fe.Code), fe.Message).SetHTTP(fe.Code), nil)
 			}
 		}
 

@@ -17,6 +17,7 @@ import (
 const LocalValidator = "validator"
 
 type validationErrorData struct {
+	Field string `json:"field"`
 	Tag   string `json:"tag"`
 	Param string `json:"param"`
 }
@@ -101,7 +102,18 @@ func (v *Validator) transformValidationErrors(errors validator.ValidationErrors)
 	m := make(map[string]validationErrorData)
 
 	for _, err := range errors {
-		m[err.Field()] = validationErrorData{
+		ns := err.Namespace()
+		if ns == "" {
+			ns = err.Field()
+		} else {
+			nss := strings.Split(ns, ".")
+			if len(nss) > 1 {
+				ns = strings.Join(nss[1:], ".")
+			}
+		}
+
+		m[ns] = validationErrorData{
+			Field: err.Field(),
 			Tag:   err.Tag(),
 			Param: err.Param(),
 		}

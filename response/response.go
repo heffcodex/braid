@@ -4,6 +4,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type IResponse interface {
+type Sender interface {
 	Send(c *fiber.Ctx) error
 }

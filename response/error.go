@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	_ IResponse = (*JSONError)(nil)
-	_ error     = (*JSONError)(nil)
+	_ Sender = (*JSONError)(nil)
+	_ error  = (*JSONError)(nil)
 )
 
 type JSONErrorFormat struct {

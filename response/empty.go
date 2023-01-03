@@ -5,7 +5,7 @@ import (
 	"github.com/heffcodex/braid/status"
 )
 
-var _ IResponse = (*Empty)(nil)
+var _ Sender = (*Empty)(nil)
 
 type Empty struct {
 	s *status.Status
