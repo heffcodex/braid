@@ -3,8 +3,8 @@ package braid
 import (
 	"time"
 
-	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
+	"github.com/redis/go-redis/v9"
 )
 
 var _ fiber.Storage = (*StorageRedis)(nil)

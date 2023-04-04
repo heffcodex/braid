@@ -2,8 +2,7 @@ package braid
 
 import (
 	"context"
-	"github.com/heffcodex/braid/response"
-	"github.com/heffcodex/braid/status"
+	"fmt"
 	"reflect"
 	"strings"
 	"unicode"
@@ -12,7 +11,9 @@ import (
 	"github.com/go-playground/mold/v4/modifiers"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	"github.com/pkg/errors"
+
+	"github.com/heffcodex/braid/response"
+	"github.com/heffcodex/braid/status"
 )
 
 const LocalValidator = "validator"
@@ -70,7 +71,7 @@ func (v *Validator) BindAndValidate(c *fiber.Ctx, form any) error {
 
 	vErr, err := v.validate(c.Context(), form)
 	if err != nil {
-		return response.EInternal(errors.Wrap(err, "cannot validate form"))
+		return response.EInternal(fmt.Errorf("validate form"))
 	} else if len(vErr) > 0 {
 		return response.EBadRequest(status.ValidationFail, vErr)
 	}

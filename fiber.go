@@ -1,11 +1,13 @@
 package braid
 
 import (
+	"errors"
+
 	gojson "github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v2"
+
 	"github.com/heffcodex/braid/response"
 	"github.com/heffcodex/braid/status"
-	"github.com/pkg/errors"
 )
 
 type OnInternalError func(c *fiber.Ctx, err error)

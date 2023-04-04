@@ -5,10 +5,9 @@ go 1.19
 require (
 	github.com/go-playground/mold/v4 v4.3.0
 	github.com/go-playground/validator/v10 v10.12.0
-	github.com/go-redis/redis/v8 v8.11.5
 	github.com/goccy/go-json v0.10.2
-	github.com/gofiber/fiber/v2 v2.42.0
-	github.com/pkg/errors v0.9.1
+	github.com/gofiber/fiber/v2 v2.43.0
+	github.com/redis/go-redis/v9 v9.0.3
 	github.com/stretchr/testify v1.8.2
 )
 
@@ -23,7 +22,7 @@ require (
 	github.com/klauspost/compress v1.16.3 // indirect
 	github.com/leodido/go-urn v1.2.2 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.17 // indirect
+	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/philhofer/fwd v1.1.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

@@ -2,10 +2,11 @@ package braid
 
 import (
 	"context"
+	"testing"
+
 	"github.com/go-playground/mold/v4"
 	"github.com/go-playground/validator/v10"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestValidator_RegisterValidation(t *testing.T) {
