@@ -1,4 +1,4 @@
-package validator
+package validation
 
 type Option func(v *Validator)
 
