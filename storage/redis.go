@@ -50,6 +50,22 @@ func NewRedis(rc redis.UniversalClient, opts ...RedisOption) *Redis {
 	return s
 }
 
+func (s *Redis) Child(opts ...RedisOption) *Redis {
+	child := &Redis{
+		ctxp:        s.ctxp,
+		rc:          s.rc,
+		ns:          s.ns,
+		flushDBMode: s.flushDBMode,
+		allowClose:  s.allowClose,
+	}
+
+	for _, opt := range opts {
+		opt(child)
+	}
+
+	return child
+}
+
 func (s *Redis) Get(key string) ([]byte, error) {
 	if key == "" {
 		return nil, nil
