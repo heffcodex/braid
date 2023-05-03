@@ -14,7 +14,6 @@ import (
 
 	"github.com/heffcodex/braid/response"
 	"github.com/heffcodex/braid/status"
-	"github.com/heffcodex/braid/vars"
 )
 
 type validationErrorData struct {
@@ -26,25 +25,6 @@ type validationErrorData struct {
 type Validator struct {
 	tf *mold.Transformer
 	v  *validator.Validate
-}
-
-func V(c *fiber.Ctx, set ...*Validator) *Validator {
-	if len(set) > 1 {
-		panic("too many arguments")
-	} else if len(set) == 1 {
-		setValidator(c, set[0])
-		return set[0]
-	}
-
-	return getValidator(c)
-}
-
-func getValidator(c *fiber.Ctx) *Validator {
-	return c.Locals(vars.LocalValidator).(*Validator)
-}
-
-func setValidator(c *fiber.Ctx, v *Validator) {
-	c.Locals(vars.LocalValidator, v)
 }
 
 func New(opts ...Option) *Validator {
