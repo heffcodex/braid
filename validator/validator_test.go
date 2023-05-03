@@ -1,4 +1,4 @@
-package braid
+package validator
 
 import (
 	"context"
@@ -9,16 +9,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestValidator_RegisterValidation(t *testing.T) {
-	v := NewValidator()
-
-	require.NoError(t, v.RegisterValidation("testTrue", func(fl validator.FieldLevel) bool {
-		return true
-	}))
-
-	require.NoError(t, v.RegisterValidation("testFalse", func(fl validator.FieldLevel) bool {
-		return false
-	}))
+func TestValidator_WithRules(t *testing.T) {
+	v := New(WithRules(
+		Rule{
+			Tag: "testTrue",
+			Fn:  func(fl validator.FieldLevel) bool { return true },
+		},
+		Rule{
+			Tag: "testFalse",
+			Fn:  func(fl validator.FieldLevel) bool { return false },
+		},
+	))
 
 	type E struct {
 		Inner struct {
@@ -42,13 +43,16 @@ func TestValidator_RegisterValidation(t *testing.T) {
 	}, vErr)
 }
 
-func TestValidator_RegisterModifier(t *testing.T) {
-	v := NewValidator()
-
-	v.RegisterModifier("test", func(ctx context.Context, fl mold.FieldLevel) error {
-		fl.Field().SetString("test")
-		return nil
-	})
+func TestValidator_WithMods(t *testing.T) {
+	v := New(WithMods(
+		Mod{
+			Tag: "test",
+			Fn: func(ctx context.Context, fl mold.FieldLevel) error {
+				fl.Field().SetString("test")
+				return nil
+			},
+		},
+	))
 
 	type form struct {
 		Field string `json:"field" mod:"test"`

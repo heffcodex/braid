@@ -1,26 +1,22 @@
 package braid
 
 import (
-	"context"
-
 	"github.com/gofiber/fiber/v2"
 )
 
-func Set[T any](c *fiber.Ctx, key string, value T) {
-	c.SetUserContext(context.WithValue(c.UserContext(), key, value))
-}
-
-func Get[T any](c *fiber.Ctx, key string) (value T, ok bool) {
-	v, ok := c.UserContext().Value(key).(T)
-	if !ok {
-		return *new(T), false
+func CtxValue[T any](c *fiber.Ctx, key string, value ...T) (v T, ok bool) {
+	if len(value) > 1 {
+		panic("too many arguments")
+	} else if len(value) == 1 {
+		return c.Locals(key, value[0]), true
 	}
 
-	return v, true
+	v, ok = c.Locals(key).(T)
+	return
 }
 
-func MustGet[T any](c *fiber.Ctx, key string) T {
-	v, ok := Get[T](c, key)
+func MustCtxValue[T any](c *fiber.Ctx, key string, value ...T) T {
+	v, ok := CtxValue[T](c, key, value...)
 	if !ok {
 		panic("`" + key + "` not found in context")
 	}

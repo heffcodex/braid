@@ -18,6 +18,6 @@ func NewRaw(s *status.Status, data []byte) *Raw {
 }
 
 func (r *Raw) Send(c *fiber.Ctx) error {
-	c.Status(r.s.HTTP())
+	c.Status(r.s.Code().HTTP())
 	return c.Send(r.data)
 }

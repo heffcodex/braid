@@ -1,4 +1,4 @@
-package braid
+package validator
 
 import (
 	"context"
@@ -14,9 +14,8 @@ import (
 
 	"github.com/heffcodex/braid/response"
 	"github.com/heffcodex/braid/status"
+	"github.com/heffcodex/braid/vars"
 )
-
-const LocalValidator = "validator"
 
 type validationErrorData struct {
 	Field string `json:"field"`
@@ -29,18 +28,29 @@ type Validator struct {
 	v  *validator.Validate
 }
 
+func V(c *fiber.Ctx, set ...*Validator) *Validator {
+	if len(set) > 1 {
+		panic("too many arguments")
+	} else if len(set) == 1 {
+		setValidator(c, set[0])
+		return set[0]
+	}
+
+	return getValidator(c)
+}
+
 func getValidator(c *fiber.Ctx) *Validator {
-	return c.Locals(LocalValidator).(*Validator)
+	return c.Locals(vars.LocalValidator).(*Validator)
 }
 
 func setValidator(c *fiber.Ctx, v *Validator) {
-	c.Locals(LocalValidator, v)
+	c.Locals(vars.LocalValidator, v)
 }
 
-func NewValidator() *Validator {
-	v := validator.New()
+func New(opts ...Option) *Validator {
+	vld := validator.New()
 
-	v.RegisterTagNameFunc(
+	vld.RegisterTagNameFunc(
 		func(fld reflect.StructField) string {
 			name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
 			if name == "-" {
@@ -50,18 +60,16 @@ func NewValidator() *Validator {
 		},
 	)
 
-	return &Validator{
+	v := &Validator{
 		tf: modifiers.New(),
-		v:  v,
+		v:  vld,
 	}
-}
 
-func (v *Validator) RegisterValidation(tag string, fn validator.Func, callValidationEvenIfNull ...bool) error {
-	return v.v.RegisterValidation(tag, fn, callValidationEvenIfNull...)
-}
+	for _, opt := range opts {
+		opt(v)
+	}
 
-func (v *Validator) RegisterModifier(tag string, fn mold.Func) {
-	v.tf.Register(tag, fn)
+	return v
 }
 
 func (v *Validator) BindAndValidate(c *fiber.Ctx, form any) error {
@@ -79,10 +87,19 @@ func (v *Validator) BindAndValidate(c *fiber.Ctx, form any) error {
 	return nil
 }
 
-func (v *Validator) Middleware() fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		setValidator(c, v)
-		return c.Next()
+func (v *Validator) registerRules(rules ...Rule) error {
+	for _, rule := range rules {
+		if err := v.v.RegisterValidation(rule.Tag, rule.Fn, rule.CallEvenIfNull); err != nil {
+			return fmt.Errorf("%s: %w", rule.Tag, err)
+		}
+	}
+
+	return nil
+}
+
+func (v *Validator) registerModifiers(mods ...Mod) {
+	for _, mod := range mods {
+		v.tf.Register(mod.Tag, mod.Fn)
 	}
 }
 

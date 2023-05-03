@@ -1,8 +1,6 @@
 package response
 
 import (
-	"fmt"
-
 	gojson "github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v2"
 
@@ -50,7 +48,7 @@ func (r *JSONError) Send(c *fiber.Ctx) error {
 		return err
 	}
 
-	c.Status(r.s.HTTP())
+	c.Status(r.s.Code().HTTP())
 	c.Response().SetBodyRaw(raw)
 	c.Response().Header.SetContentType(fiber.MIMEApplicationJSON)
 
@@ -66,9 +64,9 @@ func (r *JSONError) InternalError() error {
 }
 
 func (r *JSONError) Error() string {
-	str := fmt.Sprintf("[%d] %s", r.s.Code(), r.s.Message())
+	str := r.s.String()
 	if r.internalErr != nil {
-		str = fmt.Sprintf("%s: %s", str, r.internalErr.Error())
+		str += ": " + r.internalErr.Error()
 	}
 
 	return str

@@ -1,8 +1,14 @@
-package braid
+package storage
 
 import (
 	"context"
+
+	"github.com/gofiber/fiber/v2"
 )
+
+type Storage interface {
+	fiber.Storage
+}
 
 type ContextProvider func() context.Context
 
