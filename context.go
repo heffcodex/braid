@@ -8,7 +8,7 @@ func CtxValue[T any](c *fiber.Ctx, key string, value ...T) (v T, ok bool) {
 	if len(value) > 1 {
 		panic("too many arguments")
 	} else if len(value) == 1 {
-		return c.Locals(key, value[0]), true
+		return c.Locals(key, value[0]).(T), true
 	}
 
 	v, ok = c.Locals(key).(T)
