@@ -30,18 +30,20 @@ func CSRFConfigDefault(cookie session.CookieConfig, storage ...fiber.Storage) CS
 		Cookie:       cookie,
 		Storage:      _storage,
 		ErrorHandler: func(c *fiber.Ctx, err error) error { return response.EBadRequest(status.CSRFTokenMismatch) },
-		Extractor:    csrf.CsrfFromHeader(csrf.HeaderName),
+		Extractor: func(c *fiber.Ctx) (string, error) {
+			token, err := csrf.CsrfFromHeader(csrf.HeaderName)(c)
+			if err != nil {
+				return csrf.CsrfFromCookie(csrfCookieName(cookie.Name))(c)
+			}
+
+			return token, nil
+		},
 	}
 }
 
 func CSRF(config CSRFConfig) fiber.Handler {
-	cookieName := config.Cookie.Name
-	if cookieName == "" {
-		cookieName = "csrf_"
-	}
-
 	handler := csrf.New(csrf.Config{
-		CookieName:     cookieName,
+		CookieName:     csrfCookieName(config.Cookie.Name),
 		CookieDomain:   config.Cookie.Domain,
 		CookiePath:     config.Cookie.Path,
 		CookieSecure:   config.Cookie.Secure,
@@ -63,4 +65,12 @@ func CSRF(config CSRFConfig) fiber.Handler {
 
 		return err
 	}
+}
+
+func csrfCookieName(name string) string {
+	if name != "" {
+		return name
+	}
+
+	return "csrf_"
 }
