@@ -12,13 +12,23 @@ import (
 
 type CSRFConfig struct {
 	Cookie       session.CookieConfig                `json:"cookie" yaml:"cookie" mapstructure:"cookie"`
+	Storage      fiber.Storage                       `json:"-" yaml:"-" mapstructure:"-"`
 	ErrorHandler func(c *fiber.Ctx, err error) error `json:"-" yaml:"-" mapstructure:"-"`
 	Extractor    func(c *fiber.Ctx) (string, error)  `json:"-" yaml:"-" mapstructure:"-"`
 }
 
-func CSRFConfigDefault(cookie session.CookieConfig) CSRFConfig {
+func CSRFConfigDefault(cookie session.CookieConfig, storage ...fiber.Storage) CSRFConfig {
+	var _storage fiber.Storage
+
+	if len(storage) > 1 {
+		panic("too many arguments")
+	} else if len(storage) == 1 {
+		_storage = storage[0]
+	}
+
 	return CSRFConfig{
 		Cookie:       cookie,
+		Storage:      _storage,
 		ErrorHandler: func(c *fiber.Ctx, err error) error { return response.EBadRequest(status.CSRFTokenMismatch) },
 		Extractor:    csrf.CsrfFromHeader(csrf.HeaderName),
 	}
