@@ -52,7 +52,7 @@ func New(opts ...Option) *Validator {
 	return v
 }
 
-func (v *Validator) BindAndValidate(c *fiber.Ctx, form any) error {
+func (v *Validator) BindAndValidateForm(c *fiber.Ctx, form any) error {
 	if err := c.BodyParser(form); err != nil {
 		return response.EBadRequest(status.InvalidPayload)
 	}
@@ -60,6 +60,21 @@ func (v *Validator) BindAndValidate(c *fiber.Ctx, form any) error {
 	vErr, err := v.validate(c.Context(), form)
 	if err != nil {
 		return response.EInternal(fmt.Errorf("validate form"))
+	} else if len(vErr) > 0 {
+		return response.EBadRequest(status.ValidationFail, vErr)
+	}
+
+	return nil
+}
+
+func (v *Validator) BindAndValidateQuery(c *fiber.Ctx, query any) error {
+	if err := c.QueryParser(query); err != nil {
+		return response.EBadRequest(status.InvalidPayload)
+	}
+
+	vErr, err := v.validate(c.Context(), query)
+	if err != nil {
+		return response.EInternal(fmt.Errorf("validate query"))
 	} else if len(vErr) > 0 {
 		return response.EBadRequest(status.ValidationFail, vErr)
 	}

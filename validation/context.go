@@ -34,6 +34,10 @@ func setValidator(c *fiber.Ctx, v *Validator) {
 	c.Locals(vars.LocalValidator, v)
 }
 
-func (v *ContextValidator) BindAndValidate(form any) error {
-	return v.v.BindAndValidate(v.c, form)
+func (v *ContextValidator) Form(form any) error {
+	return v.v.BindAndValidateForm(v.c, form)
+}
+
+func (v *ContextValidator) Query(query any) error {
+	return v.v.BindAndValidateQuery(v.c, query)
 }
