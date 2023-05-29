@@ -10,8 +10,13 @@ import (
 	"github.com/heffcodex/braid/vars"
 )
 
+type CSRFConfigExpose struct {
+	Header bool `json:"header" yaml:"header" mapstructure:"header"`
+}
+
 type CSRFConfig struct {
 	Cookie       session.CookieConfig                `json:"cookie" yaml:"cookie" mapstructure:"cookie"`
+	Expose       CSRFConfigExpose                    `json:"expose" yaml:"expose" mapstructure:"expose"`
 	Storage      fiber.Storage                       `json:"-" yaml:"-" mapstructure:"-"`
 	ErrorHandler func(c *fiber.Ctx, err error) error `json:"-" yaml:"-" mapstructure:"-"`
 	Extractor    func(c *fiber.Ctx) (string, error)  `json:"-" yaml:"-" mapstructure:"-"`
@@ -58,9 +63,11 @@ func CSRF(config CSRFConfig) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		err := handler(c)
 
-		token, ok := c.Locals(vars.LocalCSRFToken).(string)
-		if ok && token != "" {
-			c.Set(csrf.HeaderName, token)
+		if config.Expose.Header {
+			token, ok := c.Locals(vars.LocalCSRFToken).(string)
+			if ok && token != "" {
+				c.Set(csrf.HeaderName, token)
+			}
 		}
 
 		return err
