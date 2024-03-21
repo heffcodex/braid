@@ -5,3 +5,7 @@ const (
 	LocalSession   = "session"
 	LocalValidator = "validator"
 )
+
+const (
+	LocalSessionOmit = LocalSession + "Omit"
+)

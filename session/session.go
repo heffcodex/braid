@@ -1,10 +1,10 @@
 package session
 
 import (
-	"github.com/heffcodex/braid/vars"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
+
+	"github.com/heffcodex/braid/vars"
 )
 
 func S(c *fiber.Ctx, set ...*session.Session) *session.Session {
@@ -16,6 +16,10 @@ func S(c *fiber.Ctx, set ...*session.Session) *session.Session {
 	}
 
 	return getSession(c)
+}
+
+func Omit(c *fiber.Ctx) {
+	c.Locals(vars.LocalSessionOmit, true)
 }
 
 func getSession(c *fiber.Ctx) *session.Session {
